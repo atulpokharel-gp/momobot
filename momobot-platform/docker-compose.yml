@@ -1,0 +1,51 @@
+version: '3.9'
+
+services:
+  server:
+    build:
+      context: ./server
+      dockerfile: Dockerfile
+    container_name: momobot-server
+    ports:
+      - "4000:4000"
+    environment:
+      - NODE_ENV=production
+      - PORT=4000
+      - DB_PATH=/data/momobot.db
+      - JWT_SECRET=${JWT_SECRET:-change_this_secret_in_production}
+      - JWT_REFRESH_SECRET=${JWT_REFRESH_SECRET:-change_this_refresh_secret}
+      - CLIENT_URL=${CLIENT_URL:-http://localhost:3000}
+      - ADMIN_EMAIL=${ADMIN_EMAIL:-admin@momobot.local}
+      - ADMIN_PASSWORD=${ADMIN_PASSWORD:-Admin@123456}
+    volumes:
+      - momobot_data:/data
+    networks:
+      - momobot_net
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "node", "-e", "require('http').get('http://localhost:4000/health', r => process.exit(r.statusCode === 200 ? 0 : 1))"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  client:
+    build:
+      context: ./client
+      dockerfile: Dockerfile
+    container_name: momobot-client
+    ports:
+      - "3000:80"
+    environment:
+      - VITE_API_URL=http://server:4000
+    depends_on:
+      - server
+    networks:
+      - momobot_net
+    restart: unless-stopped
+
+volumes:
+  momobot_data:
+
+networks:
+  momobot_net:
+    driver: bridge

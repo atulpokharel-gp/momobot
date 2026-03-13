@@ -1,0 +1,8 @@
+{
+  "scripts": {
+    "healthcheck": {
+      "command": ["python", "--version"],
+      "timeout_seconds": 30
+    }
+  }
+}
