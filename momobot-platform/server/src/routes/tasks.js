@@ -109,6 +109,103 @@ router.post('/',
   }
 );
 
+// POST /api/tasks/create - Create task with AI analysis (new endpoint)
+router.post('/create', (req, res) => {
+  const { agent_id, type, description, parameters = {}, ai_model, ai_thinking, workflow } = req.body;
+
+  if (!agent_id || !type || !description) {
+    return res.status(400).json({
+      success: false,
+      message: 'Missing required fields: agent_id, type, description'
+    });
+  }
+
+  const db = getDB();
+
+  // Verify agent exists and is owned by user
+  const agent = db.prepare(
+    'SELECT * FROM agents WHERE id = ? AND (owner_id = ? OR ? = \'admin\') AND is_active = 1'
+  ).get(agent_id, req.user.id, req.user.role);
+
+  if (!agent) {
+    return res.status(404).json({
+      success: false,
+      message: 'Agent not found or not authorized'
+    });
+  }
+
+  const taskId = uuidv4();
+  const now = new Date().toISOString();
+
+  // Insert task with AI metadata
+  db.prepare(`
+    INSERT INTO tasks (
+      id, agent_id, created_by, type, command, args, status, 
+      priority, ai_model, ai_thinking, workflow, created_at, updated_at
+    )
+    VALUES (?, ?, ?, ?, ?, ?, 'pending', 5, ?, ?, ?, ?, ?)
+  `).run(
+    taskId,
+    agent_id,
+    req.user.id,
+    type,
+    description,
+    JSON.stringify(parameters),
+    ai_model || 'none',
+    ai_thinking || null,
+    workflow ? JSON.stringify(workflow) : null,
+    now,
+    now
+  );
+
+  // Dispatch to agent if online
+  const agentSocket = connectedAgents.get(agent_id);
+  let dispatched = false;
+
+  if (agentSocket) {
+    agentSocket.emit('task', {
+      id: taskId,
+      type,
+      command: description,
+      args: parameters,
+      ai_thinking,
+      workflow,
+      priority: 5,
+      timeout: 30000
+    });
+
+    db.prepare('UPDATE tasks SET status = \'dispatched\', updated_at = ? WHERE id = ?')
+      .run(now, taskId);
+    dispatched = true;
+  }
+
+  // Notify dashboard
+  const io = req.app.get('io');
+  if (io) {
+    io.of('/client').emit('task:created', {
+      task: {
+        id: taskId,
+        agent_id,
+        agent_name: agent.name,
+        type,
+        command: description,
+        status: dispatched ? 'dispatched' : 'pending',
+        ai_model,
+        created_at: now
+      }
+    });
+  }
+
+  res.status(201).json({
+    success: true,
+    message: dispatched ? 'Task dispatched to agent' : 'Task queued (agent offline)',
+    taskId,
+    executionId: taskId,
+    status: dispatched ? 'dispatched' : 'pending',
+    dispatched
+  });
+});
+
 // DELETE /api/tasks/:id - Cancel a pending task
 router.delete('/:id', (req, res) => {
   const db = getDB();

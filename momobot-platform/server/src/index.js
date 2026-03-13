@@ -15,7 +15,9 @@ const agentRoutes = require('./routes/agents');
 const taskRoutes = require('./routes/tasks');
 const dashboardRoutes = require('./routes/dashboard');
 const workflowRoutes = require('./routes/workflows');
+const aiRoutes = require('./routes/ai');
 const setupOptimizationRoutes = require('./routes/optimizations');
+const scheduleRoutes = require('./routes/schedules');
 const { initAgentSocket } = require('./websocket/agentSocket');
 const { initClientSocket } = require('./websocket/clientSocket');
 const { authenticate } = require('./middleware/auth');
@@ -27,7 +29,7 @@ const server = http.createServer(app);
 // Socket.IO setup with CORS
 const io = new SocketServer(server, {
   cors: {
-    origin: process.env.CLIENT_URL || 'http://localhost:3000',
+    origin: [process.env.CLIENT_URL || 'http://localhost:3000', 'http://localhost:3001', 'http://localhost:3002', 'http://localhost:3003', 'http://localhost:3004', 'http://localhost:3005'],
     methods: ['GET', 'POST'],
     credentials: true
   },
@@ -40,7 +42,7 @@ app.use(helmet({
   contentSecurityPolicy: false // Allow React dev server
 }));
 app.use(cors({
-  origin: process.env.CLIENT_URL || 'http://localhost:3000',
+  origin: [process.env.CLIENT_URL || 'http://localhost:3000', 'http://localhost:3001', 'http://localhost:3002', 'http://localhost:3003', 'http://localhost:3004', 'http://localhost:3005'],
   credentials: true
 }));
 app.use(morgan('combined'));
@@ -57,6 +59,8 @@ app.use('/api/auth', authLimiter, authRoutes);
 app.use('/api/agents', apiLimiter, authenticate, agentRoutes);
 app.use('/api/tasks', apiLimiter, authenticate, taskRoutes);
 app.use('/api/workflows', apiLimiter, authenticate, workflowRoutes);
+app.use('/api/ai', apiLimiter, authenticate, aiRoutes);
+app.use('/api/schedules', apiLimiter, authenticate, scheduleRoutes);
 app.use('/api/dashboard', apiLimiter, authenticate, dashboardRoutes);
 
 // Make io accessible via req

@@ -12,7 +12,7 @@ export function connectSocket() {
 
   const token = useAuthStore.getState().accessToken
 
-  socket = io('/client', {
+  socket = io('http://localhost:4000/client', {
     auth: { token },
     reconnection: true,
     reconnectionDelay: 1000,
@@ -21,15 +21,19 @@ export function connectSocket() {
   })
 
   socket.on('connect', () => {
-    console.log('[Socket] Connected to server')
+    console.log('[Socket] ✅ Connected to server')
   })
 
   socket.on('disconnect', (reason) => {
-    console.log('[Socket] Disconnected:', reason)
+    console.warn('[Socket] ⚠️ Disconnected:', reason)
   })
 
   socket.on('connect_error', (err) => {
-    console.error('[Socket] Connection error:', err.message)
+    console.error('[Socket] ❌ Connection error:', err.message || err)
+  })
+
+  socket.on('error', (err) => {
+    console.error('[Socket] ❌ Error:', err)
   })
 
   return socket

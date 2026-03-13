@@ -7,6 +7,7 @@ const { readFile, writeFile } = require('./tasks/fileOps');
 const { getProcessList } = require('./tasks/processList');
 const { takeScreenshot } = require('./tasks/screenshot');
 const { checkEmail, monitorEmail, getEmailStats } = require('./tasks/email');
+const { openBrowser, playYouTubeVideo, navigateTo, closeBrowser } = require('./tasks/browser');
 
 const SERVER_URL = process.env.SERVER_URL || 'http://localhost:4000';
 const API_KEY = process.env.AGENT_API_KEY;
@@ -160,6 +161,22 @@ async function handleTask(task) {
 
       case 'email_stats':
         result = { data: await getEmailStats() };
+        break;
+
+      case 'browser_open':
+        result = await openBrowser(args.url || '', args.browserType);
+        break;
+
+      case 'browser_youtube':
+        result = await playYouTubeVideo(args.videoId, args);
+        break;
+
+      case 'browser_navigate':
+        result = await navigateTo(command, args);
+        break;
+
+      case 'browser_close':
+        result = await closeBrowser();
         break;
 
       case 'custom':

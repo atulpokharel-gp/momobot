@@ -3,7 +3,8 @@ import { useEffect, useState } from 'react'
 import {
   HomeIcon, CpuChipIcon, ClipboardDocumentListIcon,
   CommandLineIcon, Cog6ToothIcon, ArrowRightOnRectangleIcon,
-  BellIcon, Bars3Icon, XMarkIcon
+  BellIcon, Bars3Icon, XMarkIcon, EnvelopeIcon, SparklesIcon,
+  RectangleStackIcon
 } from '@heroicons/react/24/outline'
 import { useAuthStore } from '../store/authStore'
 import { useAgentStore } from '../store/agentStore'
@@ -16,6 +17,9 @@ const navItems = [
   { to: '/dashboard', label: 'Dashboard', icon: HomeIcon },
   { to: '/agents', label: 'Agents', icon: CpuChipIcon },
   { to: '/tasks', label: 'Tasks', icon: ClipboardDocumentListIcon },
+  { to: '/tasks/create', label: 'Task Creator', icon: SparklesIcon },
+  { to: '/workflow-builder', label: 'Workflow Builder', icon: RectangleStackIcon },
+  { to: '/email-workflow', label: 'Email Workflow', icon: EnvelopeIcon },
   { to: '/settings', label: 'Settings', icon: Cog6ToothIcon }
 ]
 
@@ -27,32 +31,40 @@ export default function Layout() {
   const [notifCount, setNotifCount] = useState(0)
 
   useEffect(() => {
-    // Init WebSocket
-    const socket = connectSocket()
+    try {
+      // Init WebSocket
+      const socket = connectSocket()
 
-    socket.on('agents:initial', ({ agents }) => {
-      setAgents(agents)
-    })
+      if (socket) {
+        socket.on('agents:initial', ({ agents }) => {
+          setAgents(agents)
+        })
 
-    socket.on('agent:status', ({ agentId, status, name }) => {
-      updateAgentStatus(agentId, status)
-      const msg = status === 'online' ? `🤖 ${name} connected` : `⚠️ ${name} disconnected`
-      const toastFn = status === 'online' ? toast.success : toast.error
-      toastFn(msg, { duration: 3000 })
-    })
+        socket.on('agent:status', ({ agentId, status, name }) => {
+          updateAgentStatus(agentId, status)
+          const msg = status === 'online' ? `🤖 ${name} connected` : `⚠️ ${name} disconnected`
+          const toastFn = status === 'online' ? toast.success : toast.error
+          toastFn(msg, { duration: 3000 })
+        })
 
-    socket.on('task:updated', ({ taskId, status, agentId }) => {
-      if (status === 'completed') toast.success(`Task completed`)
-      if (status === 'failed') toast.error(`Task failed`)
-    })
+        socket.on('task:updated', ({ taskId, status, agentId }) => {
+          if (status === 'completed') toast.success(`Task completed`)
+          if (status === 'failed') toast.error(`Task failed`)
+        })
+      }
 
-    // Load notification count
-    api.get('/dashboard/notifications').then(res => {
-      setNotifCount(res.data.unreadCount || 0)
-    }).catch(() => {})
+      // Load notification count
+      api.get('/dashboard/notifications').then(res => {
+        setNotifCount(res.data.unreadCount || 0)
+      }).catch(err => {
+        console.warn('[Layout] Failed to load notifications:', err.message)
+      })
 
-    return () => {
-      disconnectSocket()
+      return () => {
+        disconnectSocket()
+      }
+    } catch (err) {
+      console.error('[Layout] Error initializing socket:', err)
     }
   }, [])
 

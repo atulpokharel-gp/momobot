@@ -19,9 +19,11 @@
 6. [Running MomoBot](#running-momobot)
 7. [Configuration](#configuration)
 8. [Admin Dashboard](#admin-dashboard)
-9. [AI-Driven Process Optimization](#ai-driven-process-optimization)
-10. [Contributing](#contributing)
-11. [License](#license)
+9. [Visual Workflow Builder](#visual-workflow-builder)
+10. [Task Scheduling](#task-scheduling)
+11. [AI-Driven Process Optimization](#ai-driven-process-optimization)
+12. [Contributing](#contributing)
+13. [License](#license)
 
 ---
 
@@ -314,9 +316,20 @@ Once running, access the dashboard at **http://localhost:3000**:
 - Revoke device access instantly
 
 📋 **Tasks**
-- Create new automation tasks
+- Create & schedule automation tasks
 - Manage allowlists
 - Monitor execution & results
+- Schedule recurring tasks (cron expressions)
+
+🔗 **Visual Workflow Builder** ✨ NEW
+- n8n-style drag-and-drop interface
+- Create complex workflows visually
+- 11+ node types: triggers, browser automation, shell commands, file ops, email, conditions, etc.
+- Real-time visual connectors (bezier curves) between nodes
+- Node configuration panel with parameter editing
+- Execute workflows directly from the builder
+- View execution logs with success/error tracking
+- Save workflows for reuse
 
 🔐 **Settings**
 - User management & MFA setup
@@ -328,6 +341,62 @@ Once running, access the dashboard at **http://localhost:3000**:
 - Task success/failure rates
 - Agent utilization
 - Compliance reports
+
+---
+
+## Visual Workflow Builder
+
+### Overview
+The **Visual Workflow Builder** provides an n8n-style, drag-and-drop interface for creating complex automation workflows without coding.
+
+### Key Features
+
+**Node Palette** (11+ Node Types)
+- ▶️ **Start Trigger** - Workflow entry point
+- 🌐 **Open Browser** - Launch browser with URL
+- ▶️ **Play YouTube** - Play videos with specific video IDs
+- 🔗 **Navigate URL** - Navigate to URLs in browser
+- ⌨️ **Execute Shell** - Run shell commands
+- 📸 **Take Screenshot** - Capture screen
+- 📁 **File Operations** - Create, read, write files
+- 📧 **Send Email** - Send email notifications
+- ⏱️ **Wait/Delay** - Add delays between steps
+- ❓ **If/Condition** - Conditional workflow branching
+- ✓ **End** - Workflow completion
+
+**Canvas Interaction**
+- Drag nodes from palette to canvas
+- Reposition nodes by dragging
+- Click "Connect" button to create connections
+- Visual bezier curves show workflow flow
+- Arrow indicators on connections
+
+**Properties Panel**
+- Configure node parameters (URLs, commands, etc.)
+- View node position and ID
+- Delete individual nodes
+- Real-time parameter updates
+
+**Execution & Monitoring**
+- Click "Execute" to run workflows
+- View execution logs in real-time
+- Color-coded success/error messages
+- Node count and connection statistics
+
+### Usage Example
+
+1. **Add Nodes**: Drag "Start Trigger" and "Open Browser" from left panel
+2. **Configure**: Click "Open Browser" node, enter URL in properties
+3. **Connect**: Click "Connect" on start node, click browser node to link
+4. **Execute**: Type workflow name, click "Execute" button
+5. **Monitor**: Watch execution log for results
+
+### Workflow Statistics
+- **Nodes Count**: Total nodes in workflow
+- **Connections Count**: Total connections between nodes
+- All updates shown in real-time
+
+---
 
 ---
 
@@ -425,6 +494,77 @@ npm run dev
 - Verify agent token in `.env`
 - Check firewall/proxy rules
 - Review server logs: `docker-compose logs server`
+
+---
+
+## Task Scheduling
+
+### Overview
+MomoBot includes an integrated **task scheduler** that allows you to automate recurring tasks using cron expressions.
+
+### Features
+
+**Cron Expression Support**
+- Standard cron format: `minute hour day month weekday`
+- Examples:
+  - `0 9 * * *` - Every day at 9:00 AM
+  - `0 */4 * * *` - Every 4 hours
+  - `0 0 * * 0` - Every Sunday at midnight
+  - `30 2 * * 1-5` - Every weekday at 2:30 AM
+
+**Schedule Management UI**
+- Create schedules via Task Creator (Step 4)
+- View all active schedules in dashboard
+- Pause/resume schedules
+- Delete schedules
+- Track execution history
+
+**Execution Tracking**
+- Real-time execution logs
+- Success/failure notifications
+- Retry on failure with exponential backoff
+- Email notifications on completion
+
+**Schedule Status Monitoring**
+- Next scheduled run time
+- Last execution result
+- Execution count
+- Average execution duration
+
+### Usage Example
+
+1. **Create Task**: Design your automation in Task Creator
+2. **Add Schedule**: In Step 4, select frequency and time
+3. **Verify**: Check "Next Run" shows correct timing
+4. **Monitor**: Dashboard shows schedule execution history
+5. **Adjust**: Edit schedule or disable if needed
+
+### API Endpoints
+
+```bash
+# Create schedule
+POST /api/schedules
+{
+  "taskId": "task-123",
+  "cronExpression": "0 9 * * *",
+  "enabled": true
+}
+
+# Get all schedules
+GET /api/schedules
+
+# Get schedule by ID
+GET /api/schedules/:id
+
+# Update schedule
+PUT /api/schedules/:id
+
+# Delete schedule
+DELETE /api/schedules/:id
+
+# Get execution history
+GET /api/schedules/:id/executions
+```
 
 ---
 

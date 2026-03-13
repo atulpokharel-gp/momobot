@@ -1,4 +1,3 @@
-const { execa } = require('execa');
 const path = require('path');
 const logger = require('../logger');
 
@@ -17,6 +16,9 @@ async function executeShell(command, args = {}, signal) {
   if (!isCommandAllowed(command)) {
     throw new Error(`Command not allowed: ${command.split(' ')[0]}`);
   }
+
+  // Dynamic import of execa
+  const { execa } = await import('execa');
 
   const cwd = args.cwd || process.env.SHELL_CWD || process.cwd();
   const timeout = args.timeout || parseInt(process.env.DEFAULT_TIMEOUT) || 30000;
