@@ -1,0 +1,125 @@
+version: 2
+updates:
+  # Enable version updates for Node.js dependencies
+  - package-ecosystem: "npm"
+    directory: "/client"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "03:00"
+    open-pull-requests-limit: 5
+    reviewers:
+      - "atulpokharel-gp"
+    labels:
+      - "dependencies"
+      - "frontend"
+    allow:
+      - dependency-type: "production"
+      - dependency-type: "development"
+    commit-message:
+      prefix: "chore(deps): "
+      include: "scope"
+
+  - package-ecosystem: "npm"
+    directory: "/server"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "04:00"
+    open-pull-requests-limit: 5
+    reviewers:
+      - "atulpokharel-gp"
+    labels:
+      - "dependencies"
+      - "backend"
+    allow:
+      - dependency-type: "production"
+      - dependency-type: "development"
+    commit-message:
+      prefix: "chore(deps): "
+      include: "scope"
+
+  - package-ecosystem: "npm"
+    directory: "/momobot-agent"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "05:00"
+    open-pull-requests-limit: 5
+    reviewers:
+      - "atulpokharel-gp"
+    labels:
+      - "dependencies"
+      - "agent"
+    allow:
+      - dependency-type: "production"
+      - dependency-type: "development"
+    commit-message:
+      prefix: "chore(deps): "
+      include: "scope"
+
+  # Enable version updates for Docker images
+  - package-ecosystem: "docker"
+    directory: "/server"
+    schedule:
+      interval: "weekly"
+      day: "tuesday"
+      time: "03:00"
+    open-pull-requests-limit: 3
+    reviewers:
+      - "atulpokharel-gp"
+    labels:
+      - "docker"
+      - "backend"
+    commit-message:
+      prefix: "chore(docker): "
+      include: "scope"
+
+  - package-ecosystem: "docker"
+    directory: "/client"
+    schedule:
+      interval: "weekly"
+      day: "tuesday"
+      time: "04:00"
+    open-pull-requests-limit: 3
+    reviewers:
+      - "atulpokharel-gp"
+    labels:
+      - "docker"
+      - "frontend"
+    commit-message:
+      prefix: "chore(docker): "
+      include: "scope"
+
+  - package-ecosystem: "docker"
+    directory: "/momobot-agent"
+    schedule:
+      interval: "weekly"
+      day: "tuesday"
+      time: "05:00"
+    open-pull-requests-limit: 3
+    reviewers:
+      - "atulpokharel-gp"
+    labels:
+      - "docker"
+      - "agent"
+    commit-message:
+      prefix: "chore(docker): "
+      include: "scope"
+
+  # Enable GitHub Actions updates
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "wednesday"
+      time: "03:00"
+    open-pull-requests-limit: 5
+    reviewers:
+      - "atulpokharel-gp"
+    labels:
+      - "ci/cd"
+      - "github-actions"
+    commit-message:
+      prefix: "chore(ci): "
+      include: "scope"
