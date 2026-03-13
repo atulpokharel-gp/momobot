@@ -6,7 +6,7 @@
 const express = require('express');
 const ProcessOptimizer = require('../features/processOptimizer');
 const ScheduleOptimizer = require('../features/scheduleOptimizer');
-const { auth } = require('../middleware/auth');
+const { authenticate } = require('../middleware/auth');
 
 function setupOptimizationRoutes(db, scheduler, EventEmitter) {
   const router = express.Router();
@@ -16,7 +16,7 @@ function setupOptimizationRoutes(db, scheduler, EventEmitter) {
   /**
    * Analyze workflow for optimization opportunities
    */
-  router.post('/workflows/:id/analyze', auth, (req, res) => {
+  router.post('/workflows/:id/analyze', authenticate, (req, res) => {
     try {
       const { id } = req.params;
       const analysis = processOptimizer.analyzeWorkflow(id);
@@ -36,7 +36,7 @@ function setupOptimizationRoutes(db, scheduler, EventEmitter) {
   /**
    * Get optimization report for workflow
    */
-  router.get('/workflows/:id/optimization-report', auth, (req, res) => {
+  router.get('/workflows/:id/optimization-report', authenticate, (req, res) => {
     try {
       const { id } = req.params;
       const report = processOptimizer.generateOptimizationReport(id);
@@ -56,7 +56,7 @@ function setupOptimizationRoutes(db, scheduler, EventEmitter) {
   /**
    * Apply workflow optimization
    */
-  router.post('/workflows/:id/optimizations/:optimizationId/apply', auth, (req, res) => {
+  router.post('/workflows/:id/optimizations/:optimizationId/apply', authenticate, (req, res) => {
     try {
       const { id, optimizationId } = req.params;
       const requestId = processOptimizer.applyOptimization(id, optimizationId);
@@ -77,7 +77,7 @@ function setupOptimizationRoutes(db, scheduler, EventEmitter) {
   /**
    * Analyze all schedules for optimization
    */
-  router.get('/schedules/analyze', auth, (req, res) => {
+  router.get('/schedules/analyze', authenticate, (req, res) => {
     try {
       const analysis = scheduleOptimizer.analyzeAllSchedules();
 
@@ -96,7 +96,7 @@ function setupOptimizationRoutes(db, scheduler, EventEmitter) {
   /**
    * Get schedule visualization
    */
-  router.get('/schedules/visualization', auth, (req, res) => {
+  router.get('/schedules/visualization', authenticate, (req, res) => {
     try {
       const schedules = db.prepare(
         `SELECT * FROM schedules WHERE status = 'active'`
@@ -119,7 +119,7 @@ function setupOptimizationRoutes(db, scheduler, EventEmitter) {
   /**
    * Apply schedule optimization
    */
-  router.post('/schedules/optimizations/:suggestionId/apply', auth, (req, res) => {
+  router.post('/schedules/optimizations/:suggestionId/apply', authenticate, (req, res) => {
     try {
       const { suggestionId } = req.params;
       const { optimization } = req.body;
@@ -152,7 +152,7 @@ function setupOptimizationRoutes(db, scheduler, EventEmitter) {
   /**
    * Record optimization feedback
    */
-  router.post('/optimizations/:optimizationId/feedback', auth, (req, res) => {
+  router.post('/optimizations/:optimizationId/feedback', authenticate, (req, res) => {
     try {
       const { optimizationId } = req.params;
       const { approved, feedback } = req.body;
@@ -186,7 +186,7 @@ function setupOptimizationRoutes(db, scheduler, EventEmitter) {
   /**
    * Get learning report
    */
-  router.get('/optimizations/learning/report', auth, (req, res) => {
+  router.get('/optimizations/learning/report', authenticate, (req, res) => {
     try {
       const report = scheduleOptimizer.generateLearningReport();
 
@@ -205,7 +205,7 @@ function setupOptimizationRoutes(db, scheduler, EventEmitter) {
   /**
    * Compare workflow optimizations
    */
-  router.post('/workflows/compare-optimizations', auth, (req, res) => {
+  router.post('/workflows/compare-optimizations', authenticate, (req, res) => {
     try {
       const { workflowIds } = req.body;
 
@@ -250,7 +250,7 @@ function setupOptimizationRoutes(db, scheduler, EventEmitter) {
   /**
    * Get optimization status dashboard
    */
-  router.get('/optimizations/dashboard', auth, (req, res) => {
+  router.get('/optimizations/dashboard', authenticate, (req, res) => {
     try {
       const allSchedules = db.prepare(
         `SELECT * FROM schedules WHERE status = 'active'`
@@ -301,7 +301,7 @@ function setupOptimizationRoutes(db, scheduler, EventEmitter) {
   /**
    * Get optimization suggestions for workflow
    */
-  router.get('/workflows/:id/suggestions', auth, (req, res) => {
+  router.get('/workflows/:id/suggestions', authenticate, (req, res) => {
     try {
       const { id } = req.params;
       const analysis = processOptimizer.analyzeWorkflow(id);

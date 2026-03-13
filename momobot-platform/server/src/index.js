@@ -14,6 +14,7 @@ const authRoutes = require('./routes/auth');
 const agentRoutes = require('./routes/agents');
 const taskRoutes = require('./routes/tasks');
 const dashboardRoutes = require('./routes/dashboard');
+const workflowRoutes = require('./routes/workflows');
 const setupOptimizationRoutes = require('./routes/optimizations');
 const { initAgentSocket } = require('./websocket/agentSocket');
 const { initClientSocket } = require('./websocket/clientSocket');
@@ -55,6 +56,7 @@ app.get('/health', (req, res) => {
 app.use('/api/auth', authLimiter, authRoutes);
 app.use('/api/agents', apiLimiter, authenticate, agentRoutes);
 app.use('/api/tasks', apiLimiter, authenticate, taskRoutes);
+app.use('/api/workflows', apiLimiter, authenticate, workflowRoutes);
 app.use('/api/dashboard', apiLimiter, authenticate, dashboardRoutes);
 
 // Make io accessible via req

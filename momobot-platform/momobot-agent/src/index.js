@@ -6,6 +6,7 @@ const { executeShell } = require('./tasks/shell');
 const { readFile, writeFile } = require('./tasks/fileOps');
 const { getProcessList } = require('./tasks/processList');
 const { takeScreenshot } = require('./tasks/screenshot');
+const { checkEmail, monitorEmail, getEmailStats } = require('./tasks/email');
 
 const SERVER_URL = process.env.SERVER_URL || 'http://localhost:4000';
 const API_KEY = process.env.AGENT_API_KEY;
@@ -147,6 +148,18 @@ async function handleTask(task) {
 
       case 'screenshot':
         result = await takeScreenshot();
+        break;
+
+      case 'email_check':
+        result = { data: await checkEmail(args.folder || 'INBOX', args.max_results || 10) };
+        break;
+
+      case 'email_monitor':
+        result = { data: await monitorEmail(args.folder || 'INBOX', args.interval || 300000) };
+        break;
+
+      case 'email_stats':
+        result = { data: await getEmailStats() };
         break;
 
       case 'custom':
