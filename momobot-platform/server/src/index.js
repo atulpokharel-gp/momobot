@@ -6,13 +6,15 @@ const cors = require('cors');
 const helmet = require('helmet');
 const morgan = require('morgan');
 const path = require('path');
+const EventEmitter = require('events');
 
-const { initDB } = require('./db/database');
+const { initDB, getDB } = require('./db/database');
 const { seedAdmin } = require('./db/seed');
 const authRoutes = require('./routes/auth');
 const agentRoutes = require('./routes/agents');
 const taskRoutes = require('./routes/tasks');
 const dashboardRoutes = require('./routes/dashboard');
+const setupOptimizationRoutes = require('./routes/optimizations');
 const { initAgentSocket } = require('./websocket/agentSocket');
 const { initClientSocket } = require('./websocket/clientSocket');
 const { authenticate } = require('./middleware/auth');
@@ -87,6 +89,11 @@ async function start() {
     // Initialize database
     initDB();
     await seedAdmin();
+
+    // Initialize optimization routes (requires DB)
+    const db = getDB();
+    const optimizationRoutes = setupOptimizationRoutes(db, null, EventEmitter);
+    app.use('/api/optimizations', apiLimiter, authenticate, optimizationRoutes);
 
     server.listen(PORT, () => {
       console.log(`\n🚀 MomoBot Server running on port ${PORT}`);

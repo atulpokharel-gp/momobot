@@ -19,8 +19,9 @@
 6. [Running MomoBot](#running-momobot)
 7. [Configuration](#configuration)
 8. [Admin Dashboard](#admin-dashboard)
-9. [Contributing](#contributing)
-10. [License](#license)
+9. [AI-Driven Process Optimization](#ai-driven-process-optimization)
+10. [Contributing](#contributing)
+11. [License](#license)
 
 ---
 
@@ -424,6 +425,144 @@ npm run dev
 - Verify agent token in `.env`
 - Check firewall/proxy rules
 - Review server logs: `docker-compose logs server`
+
+---
+
+## AI-Driven Process Optimization
+
+MomoBot now includes an intelligent optimization engine that analyzes workflow execution patterns and suggests improvements. The system learns from user feedback to continuously refine recommendations.
+
+### 🎯 Key Capabilities
+
+**Workflow Analysis & Optimization**
+- Identify bottleneck nodes slowing down execution
+- Detect parallelization opportunities (tasks that can run concurrently)
+- Suggest schedule optimizations based on execution patterns
+- Calculate workflow risk scores and reliability metrics
+
+**Schedule Intelligence**
+- Detect time conflicts between scheduled tasks
+- Suggest task consolidation to reduce resource overhead
+- Analyze 24-hour load distribution
+- Identify reliability patterns and suggest fixes
+
+**Learning System**
+- Collects user feedback on optimization suggestions
+- Tracks which optimization types are most effective
+- Adapts recommendations based on approval rate
+- Generates insights and trend analysis
+
+### 📊 Real-World Example
+
+**Scenario**: Daily ETL pipeline takes 2 hours; some tasks could be parallel
+
+```
+1. System analyzes 100+ executions
+   ├─ Detects: "Data validation" and "Caching" have no dependencies
+   ├─ Suggests: "Run in parallel to save 35% execution time"
+   └─ Confidence: High (similar patterns work 73% of the time)
+
+2. User approves optimization
+   ├─ Workflow updated (nodes reordered)
+   ├─ Execution time drops to 78 minutes
+   └─ User confirms effectiveness
+
+3. System learns this pattern
+   ├─ Records approval + time savings
+   ├─ Increases confidence level
+   └─ Recommends similar optimizations more aggressively
+```
+
+### 🔄 Visual Workflow System (n8n-style)
+
+Create complex workflows using a drag-and-drop interface:
+
+**Node Types**:
+- **Start/End**: Workflow entry and exit points
+- **Task**: Execute any automation task
+- **Condition**: Branch workflow based on decision
+- **Webhook**: Call external APIs
+- **Notification**: Send alerts via email/Slack
+- **Delay**: Wait for specified duration
+
+**Approval Gates**:
+- Submit workflows for admin review before execution
+- Admin can approve, reject, or request modifications
+- Full audit trail of all approvals
+
+**Real-time Visualization**:
+- See execution plan before starting
+- Watch nodes execute in real-time
+- View performance metrics per node
+
+### 📈 Dashboard & Metrics
+
+```
+GET /api/optimizations/dashboard
+
+Response:
+{
+  "overview": {
+    "activeSchedules": 24,
+    "pendingOptimizations": 7,
+    "appliedOptimizations": 156,
+    "learningEffectiveness": "High"
+  },
+  "scheduleHealth": {
+    "totalConflicts": 3,
+    "consolidationOpportunities": 5,
+    "reliabilityIssues": 1
+  },
+  "learningMetrics": {
+    "totalEvaluated": 52,
+    "approvalRate": "73%",
+    "topRecommendations": [...]
+  }
+}
+```
+
+### 🚀 Using AI Optimizations
+
+**Analyze a workflow:**
+```bash
+curl -X POST http://localhost:4000/api/optimizations/workflows/wf-123/analyze \
+  -H "Authorization: Bearer $TOKEN"
+```
+
+**Get optimization suggestions:**
+```bash
+curl http://localhost:4000/api/optimizations/workflows/wf-123/suggestions \
+  -H "Authorization: Bearer $TOKEN"
+```
+
+**Analyze all schedules:**
+```bash
+curl http://localhost:4000/api/optimizations/schedules/analyze \
+  -H "Authorization: Bearer $TOKEN"
+```
+
+**Record feedback on optimization:**
+```bash
+curl -X POST http://localhost:4000/api/optimizations/opt-123/feedback \
+  -H "Authorization: Bearer $TOKEN" \
+  -d '{"approved": true, "feedback": "Saved 3 min per execution!"}'
+```
+
+**View learning report:**
+```bash
+curl http://localhost:4000/api/optimizations/learning/report \
+  -H "Authorization: Bearer $TOKEN"
+```
+
+### 📚 Learn More
+
+For complete documentation on the AI optimization system, including:
+- API endpoints reference
+- Database schema details
+- Advanced usage patterns
+- Integration examples
+
+See: [AI Optimization Guide](./server/src/features/AI_OPTIMIZATION_GUIDE.md)
 
 ---
 

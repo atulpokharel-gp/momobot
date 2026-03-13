@@ -126,6 +126,121 @@ function initDB() {
       FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
     );
 
+    -- Visual Workflows (n8n-style DAG workflows)
+    CREATE TABLE IF NOT EXISTS visual_workflows (
+      id TEXT PRIMARY KEY DEFAULT (lower(hex(randomblob(16)))),
+      name TEXT NOT NULL,
+      description TEXT,
+      nodes TEXT NOT NULL DEFAULT '[]',
+      edges TEXT NOT NULL DEFAULT '[]',
+      status TEXT DEFAULT 'draft',
+      version INTEGER DEFAULT 1,
+      created_by TEXT NOT NULL,
+      created_at TEXT DEFAULT (datetime('now')),
+      updated_at TEXT DEFAULT (datetime('now')),
+      FOREIGN KEY (created_by) REFERENCES users(id) ON DELETE CASCADE
+    );
+
+    -- Workflow Approvals
+    CREATE TABLE IF NOT EXISTS workflow_approvals (
+      id TEXT PRIMARY KEY DEFAULT (lower(hex(randomblob(16)))),
+      workflow_id TEXT NOT NULL,
+      submitted_by TEXT NOT NULL,
+      status TEXT DEFAULT 'pending',
+      comment TEXT,
+      created_at TEXT DEFAULT (datetime('now')),
+      approved_by TEXT,
+      approved_at TEXT,
+      notes TEXT,
+      rejected_by TEXT,
+      rejected_at TEXT,
+      rejection_reason TEXT,
+      FOREIGN KEY (workflow_id) REFERENCES visual_workflows(id) ON DELETE CASCADE,
+      FOREIGN KEY (submitted_by) REFERENCES users(id) ON DELETE CASCADE,
+      FOREIGN KEY (approved_by) REFERENCES users(id) ON DELETE SET NULL,
+      FOREIGN KEY (rejected_by) REFERENCES users(id) ON DELETE SET NULL
+    );
+
+    -- Workflow Executions
+    CREATE TABLE IF NOT EXISTS workflow_executions (
+      id TEXT PRIMARY KEY DEFAULT (lower(hex(randomblob(16)))),
+      workflow_id TEXT NOT NULL,
+      status TEXT DEFAULT 'running',
+      initiated_by TEXT NOT NULL,
+      variables TEXT DEFAULT '{}',
+      execution_trace TEXT DEFAULT '[]',
+      node_states TEXT DEFAULT '{}',
+      started_at TEXT DEFAULT (datetime('now')),
+      completed_at TEXT,
+      duration INTEGER DEFAULT 0,
+      created_at TEXT DEFAULT (datetime('now')),
+      FOREIGN KEY (workflow_id) REFERENCES visual_workflows(id) ON DELETE CASCADE,
+      FOREIGN KEY (initiated_by) REFERENCES users(id) ON DELETE CASCADE
+    );
+
+    -- Workflow Optimizations
+    CREATE TABLE IF NOT EXISTS workflow_optimizations (
+      id TEXT PRIMARY KEY DEFAULT (lower(hex(randomblob(16)))),
+      workflow_id TEXT NOT NULL,
+      optimization_type TEXT NOT NULL,
+      details TEXT NOT NULL,
+      status TEXT DEFAULT 'pending',
+      created_at TEXT DEFAULT (datetime('now')),
+      applied_at TEXT,
+      FOREIGN KEY (workflow_id) REFERENCES visual_workflows(id) ON DELETE CASCADE
+    );
+
+    -- Schedules (cron-based task scheduling)
+    CREATE TABLE IF NOT EXISTS schedules (
+      id TEXT PRIMARY KEY DEFAULT (lower(hex(randomblob(16)))),
+      name TEXT NOT NULL,
+      description TEXT,
+      cron_expression TEXT NOT NULL,
+      task_id TEXT,
+      workflow_id TEXT,
+      status TEXT DEFAULT 'active',
+      estimated_duration INTEGER DEFAULT 300,
+      created_by TEXT NOT NULL,
+      created_at TEXT DEFAULT (datetime('now')),
+      updated_at TEXT DEFAULT (datetime('now')),
+      FOREIGN KEY (task_id) REFERENCES tasks(id) ON DELETE SET NULL,
+      FOREIGN KEY (workflow_id) REFERENCES visual_workflows(id) ON DELETE SET NULL,
+      FOREIGN KEY (created_by) REFERENCES users(id) ON DELETE CASCADE
+    );
+
+    -- Schedule Executions
+    CREATE TABLE IF NOT EXISTS schedule_executions (
+      id TEXT PRIMARY KEY DEFAULT (lower(hex(randomblob(16)))),
+      schedule_id TEXT NOT NULL,
+      status TEXT DEFAULT 'pending',
+      duration INTEGER,
+      result TEXT,
+      error TEXT,
+      executed_at TEXT DEFAULT (datetime('now')),
+      FOREIGN KEY (schedule_id) REFERENCES schedules(id) ON DELETE CASCADE
+    );
+
+    -- Schedule Optimizations
+    CREATE TABLE IF NOT EXISTS schedule_optimizations (
+      id TEXT PRIMARY KEY DEFAULT (lower(hex(randomblob(16)))),
+      optimization_id TEXT NOT NULL,
+      type TEXT NOT NULL,
+      details TEXT NOT NULL,
+      status TEXT DEFAULT 'pending',
+      recommended_at TEXT,
+      applied_at TEXT,
+      created_at TEXT DEFAULT (datetime('now'))
+    );
+
+    -- Optimization Feedback
+    CREATE TABLE IF NOT EXISTS optimization_feedback (
+      id TEXT PRIMARY KEY DEFAULT (lower(hex(randomblob(16)))),
+      optimization_id TEXT NOT NULL,
+      approved INTEGER DEFAULT 0,
+      feedback TEXT,
+      recorded_at TEXT DEFAULT (datetime('now'))
+    );
+
     -- Indexes for performance
     CREATE INDEX IF NOT EXISTS idx_agents_owner ON agents(owner_id);
     CREATE INDEX IF NOT EXISTS idx_agents_api_key ON agents(api_key);
@@ -135,6 +250,13 @@ function initDB() {
     CREATE INDEX IF NOT EXISTS idx_agent_logs_agent ON agent_logs(agent_id);
     CREATE INDEX IF NOT EXISTS idx_sessions_user ON sessions(user_id);
     CREATE INDEX IF NOT EXISTS idx_notifications_user ON notifications(user_id);
+    CREATE INDEX IF NOT EXISTS idx_visual_workflows_created_by ON visual_workflows(created_by);
+    CREATE INDEX IF NOT EXISTS idx_workflow_approvals_workflow ON workflow_approvals(workflow_id);
+    CREATE INDEX IF NOT EXISTS idx_workflow_approvals_status ON workflow_approvals(status);
+    CREATE INDEX IF NOT EXISTS idx_workflow_executions_workflow ON workflow_executions(workflow_id);
+    CREATE INDEX IF NOT EXISTS idx_workflow_executions_status ON workflow_executions(status);
+    CREATE INDEX IF NOT EXISTS idx_schedules_status ON schedules(status);
+    CREATE INDEX IF NOT EXISTS idx_schedule_executions_schedule ON schedule_executions(schedule_id);
   `);
 
   console.log('[DB] Database initialized at:', path.resolve(DB_PATH));
