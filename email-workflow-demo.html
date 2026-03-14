@@ -1,0 +1,552 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>MomoBot Email Workflow Test</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+    
+    .container {
+      background: white;
+      border-radius: 12px;
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+      max-width: 900px;
+      width: 100%;
+      overflow: hidden;
+    }
+    
+    .header {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      padding: 30px;
+      text-align: center;
+    }
+    
+    .header h1 {
+      font-size: 28px;
+      margin-bottom: 10px;
+    }
+    
+    .header p {
+      font-size: 14px;
+      opacity: 0.9;
+    }
+    
+    .content {
+      padding: 30px;
+    }
+    
+    .section {
+      margin-bottom: 30px;
+    }
+    
+    .section h2 {
+      font-size: 18px;
+      margin-bottom: 15px;
+      color: #333;
+      border-bottom: 2px solid #667eea;
+      padding-bottom: 10px;
+    }
+    
+    .form-group {
+      margin-bottom: 15px;
+    }
+    
+    label {
+      display: block;
+      margin-bottom: 5px;
+      font-weight: 500;
+      color: #555;
+      font-size: 14px;
+    }
+    
+    input, select {
+      width: 100%;
+      padding: 10px;
+      border: 1px solid #ddd;
+      border-radius: 6px;
+      font-size: 14px;
+      font-family: inherit;
+      background: #f9f9f9;
+      transition: border-color 0.3s;
+    }
+    
+    input:focus, select:focus {
+      outline: none;
+      border-color: #667eea;
+      background: white;
+    }
+    
+    .button-group {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+    
+    button {
+      flex: 1;
+      min-width: 150px;
+      padding: 12px 20px;
+      border: none;
+      border-radius: 6px;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+    
+    .btn-primary {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+    }
+    
+    .btn-primary:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 10px 20px rgba(102, 126, 234, 0.3);
+    }
+    
+    .btn-primary:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+      transform: none;
+    }
+    
+    .btn-secondary {
+      background: #f0f0f0;
+      color: #333;
+    }
+    
+    .btn-secondary:hover {
+      background: #e0e0e0;
+    }
+    
+    .status-box {
+      background: #f9f9f9;
+      border-left: 4px solid #667eea;
+      padding: 15px;
+      border-radius: 6px;
+      margin-bottom: 15px;
+      font-size: 14px;
+    }
+    
+    .status-box.success {
+      background: #f0fdf4;
+      border-left-color: #22c55e;
+    }
+    
+    .status-box.error {
+      background: #fef2f2;
+      border-left-color: #ef4444;
+    }
+    
+    .status-box.info {
+      background: #f0f9ff;
+      border-left-color: #3b82f6;
+    }
+    
+    .status-box.warning {
+      background: #fffbeb;
+      border-left-color: #f59e0b;
+    }
+    
+    .status-icon {
+      font-size: 16px;
+      margin-right: 8px;
+    }
+    
+    #status {
+      display: none;
+    }
+    
+    #status.show {
+      display: block;
+    }
+    
+    .email-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+      gap: 15px;
+      margin-top: 20px;
+    }
+    
+    .email-card {
+      background: #f9f9f9;
+      border: 1px solid #ddd;
+      border-radius: 8px;
+      padding: 15px;
+      cursor: pointer;
+      transition: all 0.3s;
+    }
+    
+    .email-card:hover {
+      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+      border-color: #667eea;
+    }
+    
+    .email-from {
+      font-weight: 600;
+      color: #333;
+      margin-bottom: 5px;
+      font-size: 13px;
+    }
+    
+    .email-subject {
+      font-size: 13px;
+      color: #555;
+      margin-bottom: 8px;
+      line-height: 1.4;
+    }
+    
+    .email-preview {
+      font-size: 12px;
+      color: #888;
+      margin-bottom: 8px;
+      line-height: 1.4;
+    }
+    
+    .email-meta {
+      display: flex;
+      justify-content: space-between;
+      font-size: 11px;
+      color: #aaa;
+    }
+    
+    .badge {
+      display: inline-block;
+      padding: 3px 8px;
+      border-radius: 3px;
+      font-size: 11px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+    
+    .badge.unread {
+      background: #fef08a;
+      color: #854d0e;
+    }
+    
+    .badge.critical {
+      background: #fee2e2;
+      color: #991b1b;
+    }
+    
+    .badge.high {
+      background: #fecdd3;
+      color: #be123c;
+    }
+    
+    .summary-stats {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+      gap: 15px;
+      margin-top: 20px;
+    }
+    
+    .stat-card {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      padding: 15px;
+      border-radius: 8px;
+      text-align: center;
+    }
+    
+    .stat-value {
+      font-size: 32px;
+      font-weight: 700;
+      margin-bottom: 5px;
+    }
+    
+    .stat-label {
+      font-size: 12px;
+      opacity: 0.9;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+    
+    .spinner {
+      display: inline-block;
+      width: 16px;
+      height: 16px;
+      border: 2px solid #f3f3f3;
+      border-top: 2px solid #667eea;
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+      margin-right: 8px;
+      vertical-align: middle;
+    }
+    
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <h1>📧 MomoBot Email Workflow</h1>
+      <p>Check your emails and monitor them in real-time</p>
+    </div>
+    
+    <div class="content">
+      <!-- Status Section -->
+      <div class="section">
+        <h2>⚙️ Configuration</h2>
+        <div class="form-group">
+          <label>Agent ID:</label>
+          <input type="text" id="agentId" value="d235fe2f-655a-4280-9ead-89b3b6811e41" readonly>
+        </div>
+        <div class="form-group">
+          <label>Email Folder:</label>
+          <select id="emailFolder">
+            <option value="INBOX">📥 INBOX</option>
+            <option value="SENT">📤 SENT</option>
+            <option value="DRAFTS">✏️ DRAFTS</option>
+            <option value="SPAM">🚫 SPAM</option>
+            <option value="TRASH">🗑️ TRASH</option>
+            <option value="ARCHIVE">📦 ARCHIVE</option>
+          </select>
+        </div>
+        <div class="button-group">
+          <button class="btn-primary" onclick="startEmailCheck()">
+            <span id="checkBtn">Start Email Check</span>
+          </button>
+          <button class="btn-secondary" onclick="clearResults()">Clear Results</button>
+        </div>
+      </div>
+      
+      <!-- Status Display -->
+      <div id="status" class="section"></div>
+      
+      <!-- Results Section -->
+      <div id="results" style="display: none;" class="section">
+        <h2>📊 Email Results</h2>
+        <div id="summary" class="summary-stats"></div>
+        <div id="emailCards" class="email-grid"></div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const API_URL = 'http://localhost:4000/api';
+    let authToken = null;
+    
+    // Initialize
+    document.addEventListener('DOMContentLoaded', async () => {
+      // Try to get auth token from session
+      await getAuthToken();
+    });
+    
+    async function getAuthToken() {
+      try {
+        // Default login - replace with actual credentials
+        const response = await fetch(`${API_URL}/auth/login`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          credentials: 'include',
+          body: JSON.stringify({
+            email: 'admin@momobot.local',
+            password: 'admin123'
+          })
+        });
+        
+        if (response.ok) {
+          const data = await response.json();
+          authToken = data.token;
+          showStatus('Connected to MomoBot Server ✓', 'success');
+        } else {
+          showStatus('Login failed - using local demo mode', 'warning');
+        }
+      } catch (err) {
+        showStatus('Using demo mode (no server connection)', 'info');
+      }
+    }
+    
+    async function startEmailCheck() {
+      const agentId = document.getElementById('agentId').value;
+      const folder = document.getElementById('emailFolder').value;
+      const btn = document.getElementById('checkBtn');
+      
+      // Show loading state
+      btn.innerHTML = '<span class="spinner"></span>Checking emails...';
+      btn.disabled = true;
+      
+      try {
+        // Simulate API call
+        showStatus('📡 Initiating email check workflow...', 'info');
+        
+        // Demo mode - simulate email checking
+        await simulateEmailCheck(folder);
+        
+      } catch (err) {
+        showStatus(`Error: ${err.message}`, 'error');
+      } finally {
+        btn.innerHTML = 'Start Email Check';
+        btn.disabled = false;
+      }
+    }
+    
+    async function simulateEmailCheck(folder) {
+      // Show loading
+      showStatus('🔄 Email check in progress...', 'info');
+      
+      // Simulate delay
+      await new Promise(resolve => setTimeout(resolve, 1500));
+      
+      // Simulate email data
+      const emails = [
+        {
+          id: 'email-001',
+          from: 'noreply@github.com',
+          subject: 'Pull Request: Feature/AI-Optimization merged',
+          received: new Date(Date.now() - 1000 * 60 * 2).toLocaleString(),
+          preview: 'Your PR has been merged successfully',
+          read: false,
+          priority: 'high'
+        },
+        {
+          id: 'email-002',
+          from: 'support@momobot.io',
+          subject: 'System Update: Workflow Engine v2.0 Released',
+          received: new Date(Date.now() - 1000 * 60 * 15).toLocaleString(),
+          preview: 'New visual workflow builder with AI optimization',
+          read: false,
+          priority: 'normal'
+        },
+        {
+          id: 'email-003',
+          from: 'alerts@vercel.com',
+          subject: 'Deployment Successful: momobot-platform',
+          received: new Date(Date.now() - 1000 * 60 * 45).toLocaleString(),
+          preview: 'Your deployment to production completed successfully',
+          read: true,
+          priority: 'normal'
+        },
+        {
+          id: 'email-004',
+          from: 'security@company.com',
+          subject: '🚨 Security Alert: Suspicious Login Detected',
+          received: new Date(Date.now() - 1000 * 60 * 60 * 2).toLocaleString(),
+          preview: 'A login attempt was detected from a new location',
+          read: false,
+          priority: 'critical'
+        },
+        {
+          id: 'email-005',
+          from: 'team@workspace.io',
+          subject: 'Team Meeting: Q2 Planning Session',
+          received: new Date(Date.now() - 1000 * 60 * 60 * 3).toLocaleString(),
+          preview: 'Schedule your availability for upcoming planning',
+          read: true,
+          priority: 'normal'
+        },
+        {
+          id: 'email-006',
+          from: 'analytics@stripe.com',
+          subject: 'Revenue Report: March 2026',
+          received: new Date(Date.now() - 1000 * 60 * 60 * 6).toLocaleString(),
+          preview: 'Your monthly revenue summary is ready',
+          read: true,
+          priority: 'normal'
+        }
+      ];
+      
+      const unreadCount = emails.filter(e => !e.read).length;
+      const criticalCount = emails.filter(e => e.priority === 'critical').length;
+      
+      // Show success
+      showStatus(`✅ Email check completed! ${unreadCount} unread, ${criticalCount} critical`, 'success');
+      
+      // Display results
+      displayResults(emails, folder);
+    }
+    
+    function displayResults(emails, folder) {
+      const resultsDiv = document.getElementById('results');
+      const summaryDiv = document.getElementById('summary');
+      const cardsDiv = document.getElementById('emailCards');
+      
+      resultsDiv.style.display = 'block';
+      
+      // Calculate stats
+      const unread = emails.filter(e => !e.read).length;
+      const critical = emails.filter(e => e.priority === 'critical').length;
+      const high = emails.filter(e => e.priority === 'high').length;
+      
+      summaryDiv.innerHTML = `
+        <div class="stat-card">
+          <div class="stat-value">${emails.length}</div>
+          <div class="stat-label">Total Emails</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-value">${unread}</div>
+          <div class="stat-label">Unread</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-value">${critical}</div>
+          <div class="stat-label">Critical</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-value">${high}</div>
+          <div class="stat-label">High Priority</div>
+        </div>
+      `;
+      
+      cardsDiv.innerHTML = emails.map(email => `
+        <div class="email-card">
+          <div class="email-from">${email.from}</div>
+          <div class="email-subject">${email.subject}</div>
+          <div class="email-preview">${email.preview}</div>
+          <div class="email-meta">
+            <span>${email.received}</span>
+            <div>
+              ${email.read ? '' : '<span class="badge unread">Unread</span>'}
+              ${email.priority === 'critical' ? '<span class="badge critical">Critical</span>' : ''}
+              ${email.priority === 'high' ? '<span class="badge high">High</span>' : ''}
+            </div>
+          </div>
+        </div>
+      `).join('');
+    }
+    
+    function showStatus(message, type = 'info') {
+      const statusDiv = document.getElementById('status');
+      const icons = {
+        success: '✅',
+        error: '❌',
+        warning: '⚠️',
+        info: 'ℹ️'
+      };
+      
+      statusDiv.innerHTML = `<div class="status-box ${type}">
+        <span class="status-icon">${icons[type]}</span>
+        ${message}
+      </div>`;
+      statusDiv.classList.add('show');
+    }
+    
+    function clearResults() {
+      document.getElementById('results').style.display = 'none';
+      document.getElementById('status').classList.remove('show');
+    }
+  </script>
+</body>
+</html>

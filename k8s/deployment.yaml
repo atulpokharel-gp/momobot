@@ -1,0 +1,246 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: momobot
+
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: momobot-server-config
+  namespace: momobot
+data:
+  NODE_ENV: "production"
+  PORT: "4000"
+  JWT_SECRET: "change-me-in-production"
+  DATABASE_PATH: "/data/momobot.db"
+
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: momobot-data-pvc
+  namespace: momobot
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 10Gi
+  storageClassName: standard
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: momobot-server
+  namespace: momobot
+  labels:
+    app: momobot-server
+spec:
+  replicas: 2
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 0
+  selector:
+    matchLabels:
+      app: momobot-server
+  template:
+    metadata:
+      labels:
+        app: momobot-server
+    spec:
+      containers:
+      - name: server
+        image: momobot-server:latest
+        imagePullPolicy: Always
+        ports:
+        - containerPort: 4000
+          name: http
+        envFrom:
+        - configMapRef:
+            name: momobot-server-config
+        resources:
+          requests:
+            memory: "256Mi"
+            cpu: "250m"
+          limits:
+            memory: "512Mi"
+            cpu: "500m"
+        livenessProbe:
+          httpGet:
+            path: /health
+            port: 4000
+          initialDelaySeconds: 30
+          periodSeconds: 10
+          timeoutSeconds: 5
+          failureThreshold: 3
+        readinessProbe:
+          httpGet:
+            path: /health
+            port: 4000
+          initialDelaySeconds: 10
+          periodSeconds: 5
+          timeoutSeconds: 3
+        volumeMounts:
+        - name: data
+          mountPath: /data
+      volumes:
+      - name: data
+        persistentVolumeClaim:
+          claimName: momobot-data-pvc
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: momobot-server-service
+  namespace: momobot
+  labels:
+    app: momobot-server
+spec:
+  type: LoadBalancer
+  ports:
+  - port: 4000
+    targetPort: 4000
+    protocol: TCP
+    name: http
+  selector:
+    app: momobot-server
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: momobot-client
+  namespace: momobot
+  labels:
+    app: momobot-client
+spec:
+  replicas: 2
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 0
+  selector:
+    matchLabels:
+      app: momobot-client
+  template:
+    metadata:
+      labels:
+        app: momobot-client
+    spec:
+      containers:
+      - name: client
+        image: momobot-client:latest
+        imagePullPolicy: Always
+        ports:
+        - containerPort: 80
+          name: http
+        resources:
+          requests:
+            memory: "128Mi"
+            cpu: "100m"
+          limits:
+            memory: "256Mi"
+            cpu: "200m"
+        livenessProbe:
+          httpGet:
+            path: /
+            port: 80
+          initialDelaySeconds: 15
+          periodSeconds: 10
+          timeoutSeconds: 5
+          failureThreshold: 3
+        readinessProbe:
+          httpGet:
+            path: /
+            port: 80
+          initialDelaySeconds: 5
+          periodSeconds: 5
+          timeoutSeconds: 3
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: momobot-client-service
+  namespace: momobot
+  labels:
+    app: momobot-client
+spec:
+  type: LoadBalancer
+  ports:
+  - port: 3000
+    targetPort: 80
+    protocol: TCP
+    name: http
+  selector:
+    app: momobot-client
+
+---
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: momobot-server-hpa
+  namespace: momobot
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: momobot-server
+  minReplicas: 2
+  maxReplicas: 10
+  metrics:
+  - type: Resource
+    resource:
+      name: cpu
+      target:
+        type: Utilization
+        averageUtilization: 70
+  - type: Resource
+    resource:
+      name: memory
+      target:
+        type: Utilization
+        averageUtilization: 80
+
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: momobot-network-policy
+  namespace: momobot
+spec:
+  podSelector:
+    matchLabels:
+      app: momobot-server
+  policyTypes:
+  - Ingress
+  - Egress
+  ingress:
+  - from:
+    - namespaceSelector:
+        matchLabels:
+          name: momobot
+    ports:
+    - protocol: TCP
+      port: 4000
+  egress:
+  - to:
+    - namespaceSelector:
+        matchLabels:
+          name: momobot
+    ports:
+    - protocol: TCP
+      port: 4000
+  - to:
+    - podSelector: {}
+    ports:
+    - protocol: TCP
+      port: 53
+    - protocol: UDP
+      port: 53

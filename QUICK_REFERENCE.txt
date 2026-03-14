@@ -1,0 +1,280 @@
+# 🚀 MomoBot Agent - Windows Quick Reference Card
+
+## ⭐ Most Used Scripts
+
+### Daily Use
+```batch
+START_AGENT.bat                 ← Double-click daily to run agent
+```
+
+### First Time Setup
+```batch
+Path 1 (Easiest):
+  START_AGENT.bat               ← Just run it
+
+Path 2 (Recommended):
+  COMPLETE_SETUP.bat            ← Auto-installs Node.js if needed
+  
+Path 3 (Full Control):
+  INSTALL_AGENT_WINDOWS.bat     ← Complete setup wizard
+```
+
+### Need Help?
+```batch
+AGENT_SETUP_MENU.bat            ← Access all tools from menu
+DIAGNOSE_AGENT.ps1             ← Check what's wrong
+TEST_AGENT_CONNECTION.bat       ← Test connection
+```
+
+---
+
+## 🔥 One-Minute Quick Start
+
+### Step 1: Check if Node.js installed
+```cmd
+node --version
+```
+If error → Install from https://nodejs.org/
+
+### Step 2: Run agent
+```cmd
+cd momobot-agent
+npm install
+npm start
+```
+
+### Step 3: Look for
+```
+✅ Connected to MomoBot server
+```
+
+---
+
+## 📋 All Scripts Explained (ONE LINE EACH)
+
+| Script | One-Line Purpose |
+|--------|--------------------|
+| START_AGENT.bat | Quick launcher - run this daily |
+| AGENT_SETUP_MENU.bat | Main menu with all options |
+| INSTALL_AGENT_WINDOWS.bat | Full setup wizard with checks |
+| INSTALL_AGENT_WINDOWS.ps1 | Advanced setup (PowerShell) |
+| COMPLETE_SETUP.bat | Auto-downloads Node.js + setup |
+| CREATE_SHORTCUTS.ps1 | Make desktop shortcuts |
+| DIAGNOSE_AGENT.ps1 | Troubleshoot problems |
+| TEST_AGENT_CONNECTION.bat | Test if agent works |
+
+---
+
+## 🔧 Troubleshooting Cheatsheet
+
+| Problem | Solution |
+|---------|----------|
+| npm not recognized | Run: COMPLETE_SETUP.bat |
+| Can't find dependencies | Run: npm install |
+| Can't connect to server | npm start in server folder |
+| Port 4000 in use | taskkill /F /IM node.exe |
+| Don't know what's wrong | Run: DIAGNOSE_AGENT.ps1 |
+| Agent keeps disconnecting | Check SERVER_URL in .env |
+| Want desktop shortcut | Run: CREATE_SHORTCUTS.ps1 |
+
+---
+
+## ⚡ Command Line Cheatsheet
+
+```cmd
+# Install Node.js (if missing)
+Visit: nodejs.org and download LTS
+
+# Check versions
+node --version    ← Should show v18+
+npm --version     ← Should show 8+
+
+# Setup agent
+cd momobot-agent
+npm install       ← Install once
+
+# Run agent
+npm start         ← Start daily
+
+# Stop agent
+Ctrl+C           ← Press in terminal
+
+# Kill all Node processes
+taskkill /F /IM node.exe
+
+# Check what's using port 4000
+netstat -ano | findstr :4000
+
+# View logs
+type logs\agent.log
+
+# Run diagnostics (PowerShell)
+powershell -ExecutionPolicy Bypass -File "DIAGNOSE_AGENT.ps1"
+
+# Create shortcuts (PowerShell)
+powershell -ExecutionPolicy Bypass -File "CREATE_SHORTCUTS.ps1"
+```
+
+---
+
+## ✅ Success Indicators
+
+### You're good if you see:
+```
+✅ Connected to MomoBot server
+System info sent: COMPUTERNAME (win32)
+```
+
+### In dashboard:
+```
+✅ Agent appears in Agents list
+✅ Can click on agent and send commands
+✅ Commands execute successfully
+```
+
+---
+
+## 🎯 Setup Decision Tree
+
+```
+Start Here
+    ↓
+Have Node.js installed?
+    ├─ YES → Double-click START_AGENT.bat
+    └─ NO  → Run COMPLETE_SETUP.bat
+                (auto-installs Node.js)
+    ↓
+Agent is running?
+    ├─ YES → Go to http://localhost:3000 ✅
+    └─ NO  → Run DIAGNOSE_AGENT.ps1
+                Check error messages
+                Fix issue → Retry
+    ↓
+Agent in dashboard?
+    ├─ YES → Send test command ✅
+    └─ NO  → Check SERVER_URL in .env
+                Restart server
+                Restart agent
+```
+
+---
+
+## 🔐 Environment Variables (.env)
+
+```env
+Required:
+  AGENT_API_KEY=...           ← Your API key
+  AGENT_SECRET_KEY=...        ← Your secret
+  SERVER_URL=http://localhost:4000
+
+Optional:
+  LOG_LEVEL=info              ← debug/info/warn/error
+  HEARTBEAT_INTERVAL=30000    ← Milliseconds
+  RECONNECT_DELAY=5000        ← Milliseconds
+```
+
+Edit: momobot-agent\.env
+
+---
+
+## 🚨 Emergency Commands
+
+**Agent won't start?**
+```cmd
+npm install                   ← Reinstall dependencies
+npm start                     ← Try again
+```
+
+**Everything stuck?**
+```cmd
+taskkill /F /IM node.exe     ← Kill all Node processes
+npm start                     ← Start fresh
+```
+
+**Port conflicts?**
+```cmd
+netstat -ano | findstr :4000 ← Find what's using it
+taskkill /PID <ID> /F        ← Kill the process
+npm start                     ← Try again
+```
+
+---
+
+## 📱 What You Can Do
+
+Once running:
+- ✅ Execute commands
+- ✅ Monitor system
+- ✅ Take screenshots
+- ✅ Manage files
+- ✅ Check email
+- ✅ Open browser
+
+ALL from MomoBot dashboard!
+
+---
+
+## 📂 File Locations
+
+```
+C:\Users\<YOUR_USERNAME>\Desktop\momobot-platform\
+├── momobot-agent\         ← Agent code
+├── server\                ← Backend
+├── client\                ← Frontend
+└── *.bat, *.ps1, *.md     ← Setup scripts & docs
+```
+
+---
+
+## 🎬 Setup Time Estimates
+
+| Method | Time | Difficulty |
+|--------|------|-----------|
+| START_AGENT.bat | 1 min | Easy |
+| INSTALL_AGENT.bat | 5 min | Easy |
+| COMPLETE_SETUP.bat | 10 min | Easy |
+| Manual (cmd) | 15 min | Medium |
+
+---
+
+## 💬 Quick Help
+
+**I'm confused:** Read WINDOWS_SETUP_COMPLETE.md
+
+**Something's broken:** Run DIAGNOSE_AGENT.ps1
+
+**Can't connect:** Check AGENT_SETUP_WINDOWS.md → Troubleshooting
+
+**Want details:** See AGENT_SETUP_WINDOWS.md (comprehensive guide)
+
+---
+
+## ⚡ Pro Tips
+
+1. Keep agent running 24/7
+2. Use CREATE_SHORTCUTS.ps1 for auto-start
+3. Check logs in agent/logs folder
+4. Update Node.js monthly
+5. Whitelist nodeexe in firewall
+
+---
+
+## ✨ Final Checklist
+
+Before considering setup complete:
+- [ ] Node.js installed (node --version)
+- [ ] npm working (npm --version)
+- [ ] Dependencies installed (npm install done)
+- [ ] .env file configured
+- [ ] Agent starts (npm start works)
+- [ ] Agent connects (sees ✅ Connected message)
+- [ ] Agent in dashboard (http://localhost:3000)
+- [ ] Can send commands (test command works)
+
+---
+
+**Print this card and keep it handy!** 🖨️
+
+**Last Updated:** March 13, 2026  
+**Version:** 1.0.0  
+**Status:** Ready to Use ✅
